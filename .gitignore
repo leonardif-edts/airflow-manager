@@ -5,3 +5,6 @@ __pycache__/
 # Data
 *.xlsx
 *.json
+
+# Package
+*.egg-info

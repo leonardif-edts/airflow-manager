@@ -1,7 +1,7 @@
 import json
 from typing import Union
 
-from . import utils, const
+from scripts.modules import utils, const
 
 import openpyxl
 
