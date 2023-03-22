@@ -8,9 +8,9 @@ from scripts.modules import (
 
 # Interface
 @click.group()
-@click.option('--debug/--no-debug', default=False)
+@click.option('--debug/--no-debug', default=False, help="Activate logging")
 def cli(debug: bool):
-    click.echo(f"INFO - Run in `{'--debug' if (debug) else '--no-debug'}` mode")
+    click.echo(f"INFO - Debug mode is {'ON' if (debug) else 'OFF'}")
     
     level = logging.DEBUG if (debug) else logging.INFO
     logging.basicConfig(
