@@ -6,7 +6,8 @@ setup(
     packages = find_packages(),
     include_package_data = True,
     install_requires = [
-        "Click"
+        "Click",
+        "jinja2"
     ],
     entry_points = {
         "console_scripts": [

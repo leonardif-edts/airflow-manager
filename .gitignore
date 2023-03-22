@@ -8,3 +8,8 @@ __pycache__/
 
 # Package
 *.egg-info
+
+# Test/Template
+dags/
+ddl/
+dag.py

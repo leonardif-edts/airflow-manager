@@ -85,7 +85,7 @@ def _extract_dag_table(wb: openpyxl.Workbook, dag_config: dict, tablename: str) 
     dag_config["partition"] = utils._get_filtered_columns(dw_cols, "partition", True)
     dag_config["cluster"] = utils._get_filtered_columns(dw_cols, "cluster", True)
     table_columns["dw"] = utils._filter_out_keys(table_columns.get("dw", {}), ["unique", "partition", "cluster"])
-    dag_config["colums"] = table_columns
+    dag_config["columns"] = table_columns
     return dag_config
 
 
