@@ -1,19 +1,17 @@
 import os
+import logging
+
 import json
 import jinja2
 
 
-def get_config(filename: str) -> dict:
-    with open(filename, "r") as file:
-        config = json.loads(file.read())
-    return config
-
-def get_template_script(dirname: str, template: str) -> jinja2.Template:
-    pathname = os.path.join("templates", dirname, template)
+def get_blueprint(script_dir: str, template: str) -> jinja2.Template:
+    pathname = os.path.join(script_dir, "blueprint", template)
     with open(pathname, "r") as file:
         raw = file.read()
-    template_script = jinja2.Template(raw)
-    return template_script
+    blueprint = jinja2.Template(raw)
+    return blueprint
+
 
 def create_dir(dirname: str):
     dirpath = ""
@@ -26,37 +24,32 @@ def create_dir(dirname: str):
             os.mkdir(dirpath)
     return dirpath
 
-def create_ddl(ddl_dir: str, dag_config: dict, ddl_template: str = "standard.sql"):
+
+def create_ddl(ddl_dir: str, dag_config: dict, script_dir: str):
     ddl_type = os.path.join(ddl_dir, dag_config["dag"].get("type", "").lower())
     create_dir(ddl_type)
 
     pathname = os.path.join(ddl_type, dag_config["dag"]["bq_tablename"])
-    ddl_script = render_script("ddl", "standard.sql", dag_config)
+    ddl_script = render_ddl(script_dir, dag_config)
     with open(pathname, "w") as file:
         file.write(ddl_script)
 
-def render_script(dirname: str, template: str, dag_config: str):
-    template_script = get_template_script(dirname ,template)
-    rendered_script = template_script.render(**dag_config)
-    return rendered_script
+
+def render_ddl(script_dir: str, dag_config: dict) -> str:
+    blueprint = get_blueprint(script_dir, "ddl.sql")
+    ddl_script = blueprint.render(**dag_config)
+    return ddl_script
 
 
-if __name__ == "__main__":
-    config = get_config("config.json")
+def export_project(filename: str, script_dir: str):
+    config = json.load(open(filename))
 
-    # Get / Create directories: dags, ddl
-    print("Create/Get DAG and DDL directory")
+    logging.debug("Create/Get DAG and DDL directory")
     dags_dir = create_dir("dags")
     ddl_dir = create_dir("ddl")
     
     for dag in config["dags"]:
-        print(f"Create/Update DAG: {dag['dag_id']}")
+        logging.debug(f"Create/Update DAG: {dag['dag_id']}")
         dag_config = {"dag": dag, "project": config["project"]}
 
-        create_ddl(ddl_dir, dag_config)
-
-        # Get template
-        # template = get_template()
-
-        # Generate Script
-        # create_dag()
+        create_ddl(ddl_dir, dag_config, script_dir)
