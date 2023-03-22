@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Union
 
 from scripts.modules import utils, const
@@ -11,7 +12,7 @@ def extract_tf(filename: str):
     wb = openpyxl.load_workbook(filename, data_only=True)
     config = {}
 
-    print("Extract Project configuration")
+    logging.debug("Extract Project configuration")
     config = _extract_metadata(wb, config)
 
     ws_index = wb["INDEX"]
@@ -19,7 +20,7 @@ def extract_tf(filename: str):
         bq_tablename = row[1]
         dag_id = row[10]
 
-        print(f"Extract DAG configuration: Table `{bq_tablename}` DAG `{dag_id}`")
+        logging.debug(f"Extract DAG configuration: Table `{bq_tablename}` DAG `{dag_id}`")
         config = _extract_dag_config(wb, config, row)
 
     with open("config.json", "w") as file:
