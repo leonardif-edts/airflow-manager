@@ -42,10 +42,10 @@ CREATE OR REPLACE TABLE `dw.{{ dag.bq_tablename }}` (
 )
 {%- if dag.partition or dag.cluster %}
 {%- if dag.partition %}
-PARTITION BY {% for col in dag.partition -%} {{ col }}{{ ", " if not loop.last else ""}}{%- endfor -%}
+PARTITION BY {% for col in dag.partition -%} {{ col.name }}{{ ", " if not loop.last else ""}}{%- endfor -%}
 {%- endif -%}
 {%- if dag.cluster %}
-CLUSTER BY {% for col in dag.cluster -%} {{ col }}{{ ", " if not loop.last else ""}}{%- endfor -%}
+CLUSTER BY {% for col in dag.cluster -%} {{ col.name }}{{ ", " if not loop.last else ""}}{%- endfor -%}
 {% endif %}
 {%- endif -%}
 ;
@@ -53,8 +53,8 @@ CLUSTER BY {% for col in dag.cluster -%} {{ col }}{{ ", " if not loop.last else 
 
 -- REJ
 CREATE OR REPLACE TABLE `rej.{{ dag.bq_tablename }}_rej` (
+  `row` STRING,
   rej_reason STRING,
-  row STRING,
   job_date DATE,
   load_datetime DATETIME,
   job_id INT64,
