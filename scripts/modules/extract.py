@@ -2,9 +2,46 @@ import json
 import logging
 from typing import Union
 
-from scripts.modules import utils, const
+from scripts.modules import utils
 
 import openpyxl
+
+# Constant
+INDEX_COLUMNS = (
+    "no",
+    "bq_tablename",
+    "type",
+    "method",
+    "dag_type",
+    "dag_id",
+    "dag_schedule",
+    "dag_retries_count",
+    "dag_retries_delay",
+    "dag_concurrency",
+    "dag_max_active_runs",
+    "source_type",
+    "source_database",
+    "source_tablename",
+    "source_filename",
+    "source_delimiter",
+    "source_connection",
+    "description",
+    "ops_email_dev",
+    "ops_email_prd"
+)
+
+INDEX_ARRAY_COLUMNS = (
+    "ops_email_dev",
+    "ops_email_prd"
+)
+
+EXCLUDE_TABLE_COLUMNS = {
+    "job_date",
+    "load_datetime",
+    "job_id",
+    "path_filename",
+    "row"
+}
 
 
 # Public
@@ -12,7 +49,7 @@ def extract_tf(filename: str):
     wb = openpyxl.load_workbook(filename, data_only=True)
     config = {}
 
-    logging.debug("Extract Project configuration")
+    logging.debug("Extract Project deployment configuration")
     config = _extract_metadata(wb, config)
 
     ws_index = wb["INDEX"]
@@ -22,10 +59,10 @@ def extract_tf(filename: str):
         if (bq_tablename is None):
             continue
         
-        logging.debug(f"Extract DAG configuration: Table `{bq_tablename}` DAG `{dag_id}`")
+        logging.debug(f"Extract DAG deployment configuration: Table `{bq_tablename}` DAG `{dag_id}`")
         config = _extract_dag_config(wb, config, row)
 
-    with open("config.json", "w") as file:
+    with open("deployment.json", "w") as file:
         file.write(json.dumps(config, indent=2))
 
 
@@ -60,14 +97,12 @@ def _extract_dag_config(wb: openpyxl.Workbook, config: dict, row: list) -> dict:
     config["dags"] = dags
     return config
 
-
 def _extract_dag_index(row: list) -> dict:
     dag_config = {
-        key: cell if (key not in const.INDEX_ARRAY_COLUMNS) else cell.split(";")
-        for key, cell in zip(const.INDEX_COLUMNS, row)
+        key: cell if (key not in INDEX_ARRAY_COLUMNS) else cell.split(";")
+        for key, cell in zip(INDEX_COLUMNS, row)
     }
     return dag_config
-
 
 def _extract_dag_table(wb: openpyxl.Workbook, dag_config: dict, tablename: str) -> dict:
     table_columns = dag_config.get("table_columns", {})
@@ -83,13 +118,12 @@ def _extract_dag_table(wb: openpyxl.Workbook, dag_config: dict, tablename: str) 
         "dw": table_columns.get("dw", dw_cols)
     }
 
-    dag_config["unique"] = utils._extend_coalesce(utils._get_filtered_columns(dw_cols, "unique", True))
-    dag_config["partition"] = utils._get_filtered_columns(dw_cols, "partition", True)[0]
-    dag_config["cluster"] = utils._get_filtered_columns(dw_cols, "cluster", True)
-    table_columns["dw"] = utils._filter_out_keys(table_columns.get("dw", {}), ["unique", "partition", "cluster"])
+    dag_config["unique"] = utils.extend_coalesce(utils.get_filtered_columns(dw_cols, "unique", True))
+    dag_config["partition"] = utils.get_filtered_columns(dw_cols, "partition", True)[0]
+    dag_config["cluster"] = utils.get_filtered_columns(dw_cols, "cluster", True)
+    table_columns["dw"] = utils.filter_out_keys(table_columns.get("dw", {}), ["unique", "partition", "cluster"])
     dag_config["columns"] = table_columns
     return dag_config
-
 
 def _extract_dag_table_value(
         wb: openpyxl.Workbook,
@@ -101,12 +135,12 @@ def _extract_dag_table_value(
         max_col: int = None
     ):
         ws = wb[tablename]
-        max_row = utils._coalesce(max_row, ws.max_row)
-        max_col = utils._coalesce(max_col, ws.max_column)
+        max_row = utils.coalesce(max_row, ws.max_row)
+        max_col = utils.coalesce(max_col, ws.max_column)
 
         table_cols = []
         for row in ws.iter_rows(min_row, max_row, min_col, max_col, values_only=True):
-            if (row[0] is not None) and (row[0] not in const.EXCLUDE_TABLE_COLUMNS):
+            if (row[0] is not None) and (row[0] not in EXCLUDE_TABLE_COLUMNS):
                 column = {
                     key: col
                     for key, col in zip(column_labels, row)
