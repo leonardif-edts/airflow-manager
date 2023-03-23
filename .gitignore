@@ -1,2 +1,15 @@
 # Python
 __pycache__/
+.venv/
+
+# Data
+deployment.json
+service-account.json
+*.xlsx
+
+# Package
+*.egg-info
+
+# Test/Template
+dags/
+ddl/
