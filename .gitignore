@@ -12,4 +12,3 @@ config.json
 # Test/Template
 dags/
 ddl/
-dag.py

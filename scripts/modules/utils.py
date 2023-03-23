@@ -1,9 +1,24 @@
+COALESCE_VALUE = {
+    "int64": 0,
+    "float64": 0.0,
+    "string": " ",
+    "datetime": "1990-01-01 00:00:00",
+    "date": "1990-01-01"
+}
+
+def _extend_coalesce(data: list) -> list:
+    extended = [
+        {**col, "coalesce": COALESCE_VALUE[col["datatype"]]}
+        for col in data
+    ]
+    return extended
+
 def _coalesce(*values):
     return next((v for v in values if v is not None), None)
 
 def _get_filtered_columns(data: list, key: str, value) -> list:
     fltr_columns = [
-        column["name"]
+        {"name": column["name"], "datatype": column["datatype"]}
         for column in data
         if column[key] == value
     ]

@@ -16,10 +16,12 @@ def extract_tf(filename: str):
     config = _extract_metadata(wb, config)
 
     ws_index = wb["INDEX"]
-    for i, row in enumerate(ws_index.iter_rows(min_col=1, min_row=3, values_only=True)):
+    for row in ws_index.iter_rows(min_col=1, min_row=3, values_only=True):
         bq_tablename = row[1]
         dag_id = row[10]
-
+        if (bq_tablename is None):
+            continue
+        
         logging.debug(f"Extract DAG configuration: Table `{bq_tablename}` DAG `{dag_id}`")
         config = _extract_dag_config(wb, config, row)
 
@@ -37,7 +39,7 @@ def _extract_metadata(wb: openpyxl.Workbook, config: dict) -> dict:
     for row in ws.iter_rows(min_col=1, min_row=3, values_only=True):
         p_key, p_type, p_dev, p_prd = row
 
-        p_key_mapped = const.PARAMS_KEY_MAPPER.get(p_key, p_key)
+        p_key_mapped = p_key.strip(" ").replace(" ", "_").lower()
         config["project"]["dev"][p_key_mapped] = _extract_params(p_type, p_dev)
         config["project"]["prd"][p_key_mapped] = _extract_params(p_type, p_prd)
 
@@ -61,7 +63,7 @@ def _extract_dag_config(wb: openpyxl.Workbook, config: dict, row: list) -> dict:
 
 def _extract_dag_index(row: list) -> dict:
     dag_config = {
-        key: cell
+        key: cell if (key not in const.INDEX_ARRAY_COLUMNS) else cell.split(";")
         for key, cell in zip(const.INDEX_COLUMNS, row)
     }
     return dag_config
@@ -71,8 +73,8 @@ def _extract_dag_table(wb: openpyxl.Workbook, dag_config: dict, tablename: str) 
     table_columns = dag_config.get("table_columns", {})
     ext_cols = _extract_dag_table_value(wb, tablename, ["name", "datatype"], min_row=3, min_col=2, max_col=3)
     src_cols = _extract_dag_table_value(wb, tablename, ["name", "datatype", "transformation"], min_row=3, min_col=6, max_col=8)
-    stg_cols = _extract_dag_table_value(wb, tablename, ["name", "datatype", "transformation"], min_row=3, min_col=10, max_col=12)
-    dw_cols  = _extract_dag_table_value(wb, tablename, ["name", "datatype", "unique", "partition", "cluster"], min_row=3, min_col=14, max_col=18)
+    stg_cols = _extract_dag_table_value(wb, tablename, ["name", "datatype", "source", "transformation"], min_row=3, min_col=10, max_col=13)
+    dw_cols  = _extract_dag_table_value(wb, tablename, ["name", "datatype", "unique", "partition", "cluster"], min_row=3, min_col=15, max_col=19)
 
     table_columns = {
         "ext": table_columns.get("ext", ext_cols),
@@ -81,8 +83,8 @@ def _extract_dag_table(wb: openpyxl.Workbook, dag_config: dict, tablename: str) 
         "dw": table_columns.get("dw", dw_cols)
     }
 
-    dag_config["unique"] = utils._get_filtered_columns(dw_cols, "unique", True)
-    dag_config["partition"] = utils._get_filtered_columns(dw_cols, "partition", True)
+    dag_config["unique"] = utils._extend_coalesce(utils._get_filtered_columns(dw_cols, "unique", True))
+    dag_config["partition"] = utils._get_filtered_columns(dw_cols, "partition", True)[0]
     dag_config["cluster"] = utils._get_filtered_columns(dw_cols, "cluster", True)
     table_columns["dw"] = utils._filter_out_keys(table_columns.get("dw", {}), ["unique", "partition", "cluster"])
     dag_config["columns"] = table_columns
@@ -104,7 +106,7 @@ def _extract_dag_table_value(
 
         table_cols = []
         for row in ws.iter_rows(min_row, max_row, min_col, max_col, values_only=True):
-            if (row[0] is not None) and (row[0] not in const.EXCLUDE_COLUMNS):
+            if (row[0] is not None) and (row[0] not in const.EXCLUDE_TABLE_COLUMNS):
                 column = {
                     key: col
                     for key, col in zip(column_labels, row)
