@@ -10,12 +10,12 @@ from scripts.modules import utils, blueprint
 def export_project(filename: str, script_dir: str):
     config = json.load(open(filename))
 
-    logging.debug("Create/Get DAG and DDL directory")
+    logging.info("Create/Get DAG and DDL directory")
     dags_dir = utils.create_dir("dags")
     ddl_dir = utils.create_dir("ddl")
     
     for dag in config["dags"]:
-        logging.debug(f"Exporting DAG: {dag['dag_id']}")
+        logging.info(f"Exporting DAG: {dag['dag_id']}")
         dag_config = {"dag": dag, "project": config["project"]}
 
         _export_ddl(ddl_dir, dag_config, script_dir)
@@ -34,7 +34,7 @@ def _export_ddl(ddl_dir: str, dag_config: dict, script_dir: str):
     ddl_directory = os.path.join(ddl_dir, dag_config["dag"].get("type", "").lower())
     ddl_filename = f"{dag_config['dag']['bq_tablename']}.sql"
 
-    logging.debug(f"Export DDL script to `{os.path.join(ddl_directory, ddl_filename)}`")
+    logging.info(f"Export DDL script to `{os.path.join(ddl_directory, ddl_filename)}`")
     _export_script(ddl_script, ddl_directory, ddl_filename)
 
 def _export_dag(dags_dir: str, dag_config: dict, script_dir: str):
@@ -46,5 +46,5 @@ def _export_dag(dags_dir: str, dag_config: dict, script_dir: str):
         dag_script = blueprint.render_script(script_dir, blueprint_code, blueprint_file, dag_config)
         dag_script_filename = blueprint_file if (blueprint_file != "dag.py") else f"{dag_config['dag']['dag_id']}.py"
 
-        logging.debug(f"Export DAG script `{blueprint_file}` to `{os.path.join(dag_directory, dag_script_filename)}`")
+        logging.info(f"Export DAG script `{blueprint_file}` to `{os.path.join(dag_directory, dag_script_filename)}`")
         _export_script(dag_script, dag_directory, dag_script_filename)

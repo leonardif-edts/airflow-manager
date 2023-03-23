@@ -10,14 +10,13 @@ from scripts.modules import (
 
 # Interface
 @click.group()
-@click.option('--debug/--no-debug', default=False, help="Activate logging")
+@click.option('-q', '--quite', is_flag=True, default=False, help="Run in quite mode")
 @click.pass_context
-def cli(ctx: click.core.Context, debug: bool):
-    click.echo(f"INFO - Debug mode is {'ON' if (debug) else 'OFF'}")
+def cli(ctx: click.core.Context, quite: bool):
     ctx.ensure_object(dict)
     ctx.obj["scripts_dir"] = os.path.dirname(__file__)
 
-    level = logging.DEBUG if (debug) else logging.INFO
+    level = logging.ERROR if (quite) else logging.INFO
     logging.basicConfig(
         level = level,
         format = "%(levelname)s - %(message)s",
@@ -27,17 +26,20 @@ def cli(ctx: click.core.Context, debug: bool):
 
 # Command
 @cli.command()
-@click.argument("filename", type=click.Path(exists=True))
-def plan(filename: str):
+@click.option("--xlsx", type=bool, is_flag=True, default=False, help="Set mode to read xlsx")
+@click.argument("id")
+def plan(xlsx: bool, id: str):
     """Extract config from Transformation Rules"""
 
-    logging.info(f"Plan deployment with `{filename}` transformation rules")
-    config_path = extract.extract_tf(filename)
-    return config_path
+    logging.info(f"Plan deployment with transformation rules {'xlsx' if (xlsx) else 'sheet'}:  `{id}`")
+    if (xlsx):
+        extract.extract_tf(filename=id)
+    else:
+        extract.extract_tf(sheet_id=id)
 
 
 @cli.command()
-@click.argument("filename", type=click.Path(exists=True), default="config.json")
+@click.argument("filename", type=click.Path(exists=True), default="deployment.json")
 @click.pass_context
 def deploy(ctx: click.core.Context, filename: str):
     """Deploy selected configuration"""
