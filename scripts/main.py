@@ -3,8 +3,9 @@ import logging
 import click
 
 from scripts.modules import (
+    export,
     extract,
-    export
+    project
 )
 
 
@@ -26,6 +27,24 @@ def cli(ctx: click.core.Context, quite: bool):
 
 # Command
 @cli.command()
+@click.argument("filename", type=click.Path(exists=True), default="deployment.json")
+@click.pass_context
+def deploy(ctx: click.core.Context, filename: str):
+    """Deploy selected configuration"""
+
+    logging.info(f"Deploy from `{filename}` configuration")
+    export.export_project(filename, script_dir=ctx.obj["scripts_dir"])
+
+
+@cli.command()
+def init():
+    """Initiate current directory to Airflow repository"""
+
+    logging.info(f"Initiate Airflow repository")
+    project.init_project()
+
+
+@cli.command()
 @click.option("--xlsx", type=bool, is_flag=True, default=False, help="Set mode to read xlsx")
 @click.argument("id")
 def plan(xlsx: bool, id: str):
@@ -36,16 +55,6 @@ def plan(xlsx: bool, id: str):
         extract.extract_tf(filename=id)
     else:
         extract.extract_tf(sheet_id=id)
-
-
-@cli.command()
-@click.argument("filename", type=click.Path(exists=True), default="deployment.json")
-@click.pass_context
-def deploy(ctx: click.core.Context, filename: str):
-    """Deploy selected configuration"""
-
-    logging.info(f"Deploy from `{filename}` configuration")
-    export.export_project(filename, script_dir=ctx.obj["scripts_dir"])
 
 
 if __name__ == "__main__":
