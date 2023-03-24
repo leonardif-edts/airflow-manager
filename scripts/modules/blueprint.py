@@ -3,14 +3,12 @@ from typing import List
 
 import jinja2
 
-# Constant
-BLUEPRINT_CODE = {
-    "Postgres to BQ RV": "postgres_to_bq_rv"
-}
+from scripts import const
+
 
 # Public
 def get_blueprint_code(dag_type: str):
-    return BLUEPRINT_CODE[dag_type]
+    return const.BLUEPRINT_CODE[dag_type]
 
 def get_blueprint_filelist(script_dir: str, blueprint_code: str) -> List[str]:
     pathname = os.path.join(script_dir, "blueprint", blueprint_code)

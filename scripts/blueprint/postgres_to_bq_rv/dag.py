@@ -1,4 +1,3 @@
-{% raw %}
 from datetime import datetime, timedelta
 import pendulum
 import json
@@ -23,8 +22,8 @@ from airflow.providers.google.cloud.operators.bigquery import (
 from composer_idm_klik_apollo_prd.dags.shared import (
     log_insert, 
     macro, 
-    callback,
-    custom_delete_insert
+    callback{%- if (dag.type | lower == "transaction") and (dag.method | lower == "delete/insert") %},
+    custom_delete_insert{%- endif %}
 )
 
 # Load default global config
@@ -76,6 +75,7 @@ default_args = {
 }
 
 # Define dag
+{% raw %}
 with DAG(
     JOB["job_name"],
     access_control          = {f"{JOB['tags'][0]}-ops": {"can_read", "can_edit"}},
@@ -268,12 +268,17 @@ with DAG(
                 }
             )
 
+
+    {%- endraw %}
+    {% if (dag.type | lower == "transaction") and (dag.method | lower == "delete/insert") %}
+    
     delete_tmp = BigQueryDeleteTableOperator(
         task_id                 = "delete_tmp",
         ignore_if_missing       = True,
         deletion_dataset_table  = f"{JOB['project_id']}.{BQ['tmp_dataset_tablename']}_tmp"
     )
-
+    {% endif -%}
+    {% raw %}
 
     seq_log_etl = log_insert.KlikSequenceLogInsert(
         project_id = JOB["project_id"],
@@ -305,9 +310,13 @@ with DAG(
         >> source_to_ext
         >> ext_to_src
         >> src_to_stg
+        {%- endraw %}{% if (dag.type | lower == "transaction") and (dag.method | lower == "delete/insert") %}
         >> delete_exist_dw
+        {%- endif %}{%- raw %}
         >> stg_to_dw
+        {%- endraw %}{% if (dag.type | lower == "transaction") and (dag.method | lower == "delete/insert") %}
         >> delete_tmp
+        {%- endif %}{%- raw %}
         >> seq_log_etl
         >> rm_process_file
         >> job_finish

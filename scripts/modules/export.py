@@ -3,7 +3,8 @@ import logging
 
 import json
 
-from scripts.modules import utils, blueprint
+from scripts.modules import blueprint
+from scripts import utils
 
 
 # Public

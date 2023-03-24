@@ -1,3 +1,7 @@
+BLUEPRINT_CODE = {
+    "Postgres to BQ RV": "postgres_to_bq_rv"
+}
+
 COALESCE_VALUE = {
     "int64": 0,
     "float64": 0.0,

@@ -5,7 +5,7 @@ from typing import Union, Optional
 import openpyxl
 import gspread
 
-from scripts.modules import utils, const
+from scripts import const, utils
 
 
 # Public

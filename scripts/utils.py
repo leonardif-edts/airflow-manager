@@ -1,7 +1,8 @@
 import os
 from typing import List
 
-from scripts.modules import const
+from scripts import const
+
 
 # Public
 def create_dir(dirname: str, prune: int = 0):
@@ -15,7 +16,6 @@ def create_dir(dirname: str, prune: int = 0):
         if (not os.path.exists(dirpath)):
             os.mkdir(dirpath)
     return dirpath
-
 
 def coalesce(*values):
     return next((v for v in values if v is not None), None)

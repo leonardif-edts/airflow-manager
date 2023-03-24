@@ -1,6 +1,7 @@
 # Python
 __pycache__/
 .venv/
+*_env/
 
 # Data
 deployment.json
@@ -11,6 +12,6 @@ service-account.json
 *.egg-info
 dist/
 
-# Test/Template
+# Temporary
 dags/
 ddl/

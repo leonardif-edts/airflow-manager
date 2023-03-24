@@ -1,4 +1,4 @@
-{% raw %}
+{%- raw -%}
 DELETE FROM `{{ params.project_id }}.{{ params.target_dataset_tablename }}`
 WHERE job_id = {{ job_id_bq(data_interval_end) }}
   AND job_date = PARSE_DATE("%Y%m%d", SUBSTR(CAST({{ job_id_bq(data_interval_end) }} AS STRING), 1, 8));
