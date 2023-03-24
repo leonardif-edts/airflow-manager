@@ -1,15 +1,17 @@
 import json
 import logging
+from datetime import datetime
 from typing import Union, Optional
 
 import openpyxl
 import gspread
 
 from scripts import const, utils
+from scripts.modules import project
 
 
 # Public
-def extract_tf(filename: Optional[str] = None, sheet_id: Optional[str] = None):
+def extract_tf(version_dir, filename: Optional[str] = None, sheet_id: Optional[str] = None):
     if (filename and sheet_id is None) or (filename is None and sheet_id):
         mode = "xlsx" if (filename) else "sheet"
     else:
@@ -38,8 +40,13 @@ def extract_tf(filename: Optional[str] = None, sheet_id: Optional[str] = None):
         logging.info(f"Extract DAG deployment configuration: Table `{bq_tablename}` DAG `{dag_id}`")
         config = _extract_dag_config(wb, mode, config, row)
 
-    with open("deployment.json", "w") as file:
-        file.write(json.dumps(config, indent=2))
+    timestamp = datetime.now()
+    filename = f"{timestamp.strftime('%Y%m%d%H%M%S')}.json"
+    utils.export_json(config, version_dir, filename)
+    project.update_metadata({
+        "plan.latest_version": filename.replace(".json", ""),
+        "plan.update_tm": timestamp
+    })
 
 
 # Private
@@ -129,3 +136,10 @@ def _extract_dag_table_value(
                 }
                 table_cols.append(column)
         return table_cols
+
+
+def _export_deployment(config: dict, dirname: str):
+    tm = datetime.now().strftime("%Y%m%d%H%M%S")
+    pathname = os.path.join(dirname, f"{tm}.json")
+
+    

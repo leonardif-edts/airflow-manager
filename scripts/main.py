@@ -51,10 +51,12 @@ def plan(xlsx: bool, id: str):
     """Extract config from Transformation Rules"""
 
     logging.info(f"Plan deployment with transformation rules {'xlsx' if (xlsx) else 'sheet'}:  `{id}`")
+    version_dir = project.get_version_dir()
+    click.echo(version_dir)
     if (xlsx):
-        extract.extract_tf(filename=id)
+        extract.extract_tf(filename=id, version_dir=version_dir)
     else:
-        extract.extract_tf(sheet_id=id)
+        extract.extract_tf(sheet_id=id, version_dir=version_dir)
 
 
 if __name__ == "__main__":
