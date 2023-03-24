@@ -27,13 +27,14 @@ def cli(ctx: click.core.Context, quite: bool):
 
 # Command
 @cli.command()
-@click.argument("filename", type=click.Path(exists=True), default="deployment.json")
+@click.argument("version", type=str)
 @click.pass_context
-def deploy(ctx: click.core.Context, filename: str):
+def deploy(ctx: click.core.Context, version: str):
     """Deploy selected configuration"""
 
-    logging.info(f"Deploy from `{filename}` configuration")
-    export.export_project(filename, script_dir=ctx.obj["scripts_dir"])
+    logging.info(f"Deploy from `{version}` configuration")
+    version_dir = project.get_version_dir()
+    export.export_project(version, script_dir=ctx.obj["scripts_dir"], version_dir=version_dir)
 
 
 @cli.command()
@@ -61,13 +62,6 @@ def plan_create(xlsx: bool, id: str):
         extract.extract_tf(filename=id, version_dir=version_dir)
     else:
         extract.extract_tf(sheet_id=id, version_dir=version_dir)
-
-@plan.command(name="list")
-def plan_list():
-    """Get list of saved deployment plan"""
-    plan_list = project.get_plan_list()
-    if (plan_list == []):
-        logging.info("There is no available deployment plan")
 
 
 if __name__ == "__main__":
