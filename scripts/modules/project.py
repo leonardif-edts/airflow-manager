@@ -1,9 +1,12 @@
 import os
 import json
+import logging
 import flatten_dict
+import itertools
+from typing import Optional
 from datetime import datetime
 
-from scripts import utils
+from scripts import utils, const
 
 
 # Public
@@ -31,6 +34,27 @@ def init_project():
     utils.export_json(sorted_project_metadata, manager_dir, "metadata.json")
     utils.export_json(None, manager_dir, "plan_logs.json")
     utils.export_json(None, manager_dir, "deploy_logs.json")
+
+def get_plan_list() -> Optional[list]:
+    manager_dir = _get_manager_dir()
+    plan_logs_path = os.path.join(manager_dir, "plan_logs.json")
+    with open(plan_logs_path, "r") as file:
+        plan_logs = [
+            json.loads(log)
+            for log in file.readlines()
+        ]
+    
+    if (len(plan_logs) == 0):
+        print("test")
+    
+    plan_keys = itertools.chain.from_iterable([plan.keys() for plan in plan_logs])
+    plan_unique_keys = const.PLAN_LOG_COLUMNS + [key for key in sorted(set(plan_keys)) if key not in const.PLAN_LOG_COLUMNS]
+
+    plan_list = [plan_unique_keys] + [
+        [plan.get(key) for key in plan_unique_keys]
+        for plan in plan_logs
+    ]
+    return plan_list
 
 def get_version_dir():
     manager_dir = _get_manager_dir()
@@ -67,10 +91,7 @@ def update_plan_logs(config: dict, source_type: str, source_id: str, filename: s
         "create_ts": datetime.strptime(config_id, "%Y%m%d%H%M%S").strftime("%Y-%m-%d %H:%M:%S"),
         "source_type": source_type,
         "source_id": source_id,
-        "total_dags": len(config["dags"]),
-        **_count_dag(config["dags"], prefix="table_type", key="type"),
-        **_count_dag(config["dags"], prefix="table_method", key="method"),
-        **_count_dag(config["dags"], prefix="dag_type", key="dag_type")
+        "total_dags": len(config["dags"])
     }
 
     _append_logs(log_data, plan_logs_path)
@@ -82,20 +103,6 @@ def _append_logs(log_data: dict, logs_path: str):
         file.write(json.dumps(log_data))
         file.write("\n")
 
-def _count_dag(dags: list, prefix: str, key: str):
-    unique_values = [
-        f"{prefix}_{k.lower().replace(' ', '_')}"
-        for k in set([dag[key] for dag in dags])
-    ]
-
-    counter = {k: 0 for k in unique_values}
-    for dag in dags:
-        code = f"{prefix}_{dag[key].lower().replace(' ', '_')}"
-        counter[code] += 1
-    
-    sorted_counter = {k: counter[k] for k in sorted(counter.keys())}
-    return sorted_counter
-
 def _get_manager_dir():
     current_dir = os.getcwd()
     if (".airflow-manager" in os.listdir(current_dir)):
@@ -103,11 +110,12 @@ def _get_manager_dir():
     
     trace = current_dir 
     trace_parent = os.path.dirname(current_dir)
-    while(trace_parent != current_dir):
+    while(trace_parent != trace):
         if (".airflow-manager" in os.listdir(trace)):
             return os.path.join(trace, ".airflow-manager")
         trace = trace_parent
         trace_parent = os.path.dirname(trace)
+    raise EOFError
 
 def _get_metadata(manager_dir: str, key: str):
     pathname = os.path.join(manager_dir, "metadata.json")

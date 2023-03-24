@@ -1,6 +1,7 @@
 import os
 import logging
 import click
+import prettytable
 
 from scripts.modules import (
     export,
@@ -31,10 +32,12 @@ def cli(ctx: click.core.Context, quite: bool):
 @click.pass_context
 def deploy(ctx: click.core.Context, version: str):
     """Deploy selected configuration"""
-
-    logging.info(f"Deploy from `{version}` configuration")
-    version_dir = project.get_version_dir()
-    export.export_project(version, script_dir=ctx.obj["scripts_dir"], version_dir=version_dir)
+    try:
+        logging.info(f"Deploy from `{version}` configuration")
+        version_dir = project.get_version_dir()
+        export.export_project(version, script_dir=ctx.obj["scripts_dir"], version_dir=version_dir)
+    except EOFError:
+        logging.info("No `.airflow-manager` config directory found")
 
 
 @cli.command()
@@ -55,13 +58,30 @@ def plan():
 @click.argument("id", type=str)
 def plan_create(xlsx: bool, id: str):
     """Extract config from Transformation Rules"""
-    
-    logging.info(f"Plan deployment with transformation rules {'xlsx' if (xlsx) else 'sheet'}:  `{id}`")
-    version_dir = project.get_version_dir()
-    if (xlsx):
-        extract.extract_tf(filename=id, version_dir=version_dir)
-    else:
-        extract.extract_tf(sheet_id=id, version_dir=version_dir)
+    try:
+        logging.info(f"Plan deployment with transformation rules {'xlsx' if (xlsx) else 'sheet'}:  `{id}`")
+        version_dir = project.get_version_dir()
+        if (xlsx):
+            extract.extract_tf(filename=id, version_dir=version_dir)
+        else:
+            extract.extract_tf(sheet_id=id, version_dir=version_dir)
+    except EOFError:
+        logging.info("No `.airflow-manager` config directory found")
+
+@plan.command(name="list")
+def plan_list():
+    """Show list of created deployment config from Transformation Rules"""
+    try:
+        plans = project.get_plan_list()
+        if (plans):
+            tbl = prettytable.PrettyTable(plans[0])
+            for row in plans[1:]:
+                tbl.add_row(row)
+            print(tbl)
+        else:
+            logging.info("There is no logs for plan")
+    except EOFError:
+        logging.info("No `.airflow-manager` config directory found")
 
 
 if __name__ == "__main__":

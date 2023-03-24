@@ -45,3 +45,11 @@ EXCLUDE_TABLE_COLUMNS = {
     "path_filename",
     "row"
 }
+
+PLAN_LOG_COLUMNS = [
+    "id",
+    "create_ts",
+    "source_type",
+    "source_id",
+    "total_dags"
+]
