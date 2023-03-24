@@ -32,7 +32,10 @@ def extend_coalesce(data: list) -> list:
 def export_json(data: dict, dirname: str, filename: str):
     pathname = os.path.join(dirname, filename)
     with open(pathname, "w") as file:
-        file.write(json.dumps(data, indent=2, default=_json_serializer))
+        if (data):
+            file.write(json.dumps(data, indent=2, default=_json_serializer))
+        else:
+            file.write("")
 
 def filter_out_keys(data: list, keys: list) -> list:
     fltr_columns = [

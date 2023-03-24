@@ -4,7 +4,6 @@ import flatten_dict
 from datetime import datetime
 
 from scripts import utils
-from scripts.modules import blueprint
 
 
 # Public
@@ -30,6 +29,8 @@ def init_project():
     }
     sorted_project_metadata = {k: project_metadata[k] for k in sorted(project_metadata.keys())}
     utils.export_json(sorted_project_metadata, manager_dir, "metadata.json")
+    utils.export_json(None, manager_dir, "plan_logs.json")
+    utils.export_json(None, manager_dir, "deploy_logs.json")
 
 def get_version_dir():
     manager_dir = _get_manager_dir()
@@ -41,6 +42,20 @@ def update_metadata(values: dict):
     metadata = json.load(open(os.path.join(manager_dir, "metadata.json")))
     upt_metadata = _update_metadata_value(metadata, values)
     utils.export_json(upt_metadata, manager_dir, "metadata.json")
+
+def update_deploy_logs(config: dict, version: str):
+    manager_dir = _get_manager_dir()
+    deploy_logs_path = os.path.join(manager_dir, "deploy_logs.json")
+    
+    timestamp = datetime.now()
+    log_data = {
+        "id": timestamp.strftime("%Y%m%d%H%M%S"),
+        "create_ts": timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+        "plan_id": version,
+        "total_dags": len(config["dags"])
+    }
+
+    _append_logs(log_data, deploy_logs_path)
 
 def update_plan_logs(config: dict, source_type: str, source_id: str, filename: str):
     manager_dir = _get_manager_dir()
