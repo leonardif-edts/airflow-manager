@@ -44,20 +44,31 @@ def init():
     project.init_project()
 
 
-@cli.command()
-@click.option("--xlsx", type=bool, is_flag=True, default=False, help="Set mode to read xlsx")
-@click.argument("id")
-def plan(xlsx: bool, id: str):
-    """Extract config from Transformation Rules"""
+@cli.group()
+def plan():
+    """Managing deployment plan creation and versioning"""
+    pass
 
+@plan.command(name="create")
+@click.option("--xlsx", type=bool, is_flag=True, default=False, help="Set mode to read xlsx")
+@click.argument("id", type=str)
+def plan_create(xlsx: bool, id: str):
+    """Extract config from Transformation Rules"""
+    
     logging.info(f"Plan deployment with transformation rules {'xlsx' if (xlsx) else 'sheet'}:  `{id}`")
     version_dir = project.get_version_dir()
-    click.echo(version_dir)
     if (xlsx):
         extract.extract_tf(filename=id, version_dir=version_dir)
     else:
         extract.extract_tf(sheet_id=id, version_dir=version_dir)
 
+@plan.command(name="list")
+def plan_list():
+    """Get list of saved deployment plan"""
+    plan_list = project.get_plan_list()
+    if (plan_list == []):
+        logging.info("There is no available deployment plan")
+
 
 if __name__ == "__main__":
-    cli()
+    cli(obj={})

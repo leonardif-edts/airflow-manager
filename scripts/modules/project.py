@@ -1,8 +1,10 @@
 import os
 import json
 import flatten_dict
+from datetime import datetime
 
 from scripts import utils
+from scripts.modules import blueprint
 
 
 # Public
@@ -19,11 +21,11 @@ def init_project():
         },
         "deploy": {
             "latest_version": None,
-            "update_tm": None
+            "update_ts": None
         },
         "plan": {
             "latest_version": None,
-            "update_tm": None
+            "update_ts": None
         }
     }
     sorted_project_metadata = {k: project_metadata[k] for k in sorted(project_metadata.keys())}
@@ -40,7 +42,45 @@ def update_metadata(values: dict):
     upt_metadata = _update_metadata_value(metadata, values)
     utils.export_json(upt_metadata, manager_dir, "metadata.json")
 
+def update_plan_logs(config: dict, source_type: str, source_id: str, filename: str):
+    manager_dir = _get_manager_dir()
+    plan_logs_path = os.path.join(manager_dir, "plan_logs.json")
+
+    config_id = filename.replace(".json", "")
+    log_data = {
+        "id": config_id,
+        "create_ts": datetime.strptime(config_id, "%Y%m%d%H%M%S").strftime("%Y-%m-%d %H:%M:%S"),
+        "source_type": source_type,
+        "source_id": source_id,
+        "total_dags": len(config["dags"]),
+        **_count_dag(config["dags"], prefix="table_type", key="type"),
+        **_count_dag(config["dags"], prefix="table_method", key="method"),
+        **_count_dag(config["dags"], prefix="dag_type", key="dag_type")
+    }
+
+    _append_logs(log_data, plan_logs_path)
+
+
 # Private
+def _append_logs(log_data: dict, logs_path: str):
+    with open(logs_path, "a") as file:
+        file.write(json.dumps(log_data))
+        file.write("\n")
+
+def _count_dag(dags: list, prefix: str, key: str):
+    unique_values = [
+        f"{prefix}_{k.lower().replace(' ', '_')}"
+        for k in set([dag[key] for dag in dags])
+    ]
+
+    counter = {k: 0 for k in unique_values}
+    for dag in dags:
+        code = f"{prefix}_{dag[key].lower().replace(' ', '_')}"
+        counter[code] += 1
+    
+    sorted_counter = {k: counter[k] for k in sorted(counter.keys())}
+    return sorted_counter
+
 def _get_manager_dir():
     current_dir = os.getcwd()
     if (".airflow-manager" in os.listdir(current_dir)):

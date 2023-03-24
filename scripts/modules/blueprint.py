@@ -8,7 +8,7 @@ from scripts import const
 
 # Public
 def get_blueprint_code(dag_type: str):
-    return const.BLUEPRINT_CODE[dag_type]
+    return dag_type.lower().strip().replace(" ", "_")
 
 def get_blueprint_filelist(script_dir: str, blueprint_code: str) -> List[str]:
     pathname = os.path.join(script_dir, "blueprint", blueprint_code)
