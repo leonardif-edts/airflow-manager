@@ -55,10 +55,10 @@ def deploy_create(ctx: click.core.Context, version: str):
 def deploy_list():
     """Show list of created deployment config from Transformation Rules"""
     try:
-        plans = project.get_log_list("deploy_logs.json", const.PLAN_DEPLOY_COLUMNS)
-        if (plans):
-            tbl = prettytable.PrettyTable(plans[0])
-            for row in plans[1:]:
+        deploys = project.get_log_list("deploy_logs.json", const.PLAN_DEPLOY_COLUMNS)
+        if (len(deploys) > 1):
+            tbl = prettytable.PrettyTable(deploys[0])
+            for row in deploys[1:]:
                 tbl.add_row(row)
             print(tbl)
         else:
@@ -101,7 +101,7 @@ def plan_list():
     """Show list of created deployment config from Transformation Rules"""
     try:
         plans = project.get_log_list("plan_logs.json", const.PLAN_LOG_COLUMNS)
-        if (plans):
+        if (len(plans) > 1):
             tbl = prettytable.PrettyTable(plans[0])
             for row in plans[1:]:
                 tbl.add_row(row)

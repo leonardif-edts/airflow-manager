@@ -4,34 +4,38 @@ import flatten_dict
 from typing import Optional, List
 from datetime import datetime
 
-from scripts import utils, const
+from scripts import utils
 
 
 # Public
 def init_project():
     current_dir = os.getcwd()
-    manager_dir = utils.create_dir(os.path.join(current_dir, ".airflow-manager"))
-    version_dir = utils.create_dir(os.path.join(manager_dir, "version"))
+    try:
+        manager_dir = _get_manager_dir()
+    except EOFError:
+        manager_dir = utils.create_dir(os.path.join(current_dir, ".airflow-manager"))
+        version_dir = utils.create_dir(os.path.join(manager_dir, "version"))
 
-    project_metadata = {
-        "dirname": {
-            "project": current_dir,
-            "manager": manager_dir,
-            "version": version_dir
-        },
-        "deploy": {
-            "latest_version": None,
-            "update_ts": None
-        },
-        "plan": {
-            "latest_version": None,
-            "update_ts": None
+        project_metadata = {
+            "dirname": {
+                "project": current_dir,
+                "manager": manager_dir,
+                "version": version_dir
+            },
+            "deploy": {
+                "latest_version": None,
+                "update_ts": None
+            },
+            "plan": {
+                "latest_version": None,
+                "update_ts": None
+            }
         }
-    }
-    sorted_project_metadata = {k: project_metadata[k] for k in sorted(project_metadata.keys())}
-    utils.export_json(sorted_project_metadata, manager_dir, "metadata.json")
-    utils.export_json(None, manager_dir, "plan_logs.json")
-    utils.export_json(None, manager_dir, "deploy_logs.json")
+        sorted_project_metadata = {k: project_metadata[k] for k in sorted(project_metadata.keys())}
+        utils.export_json(sorted_project_metadata, manager_dir, "metadata.json")
+        utils.export_json(None, manager_dir, "plan_logs.json")
+        utils.export_json(None, manager_dir, "deploy_logs.json")
+
 
 def get_latest_version() -> str:
     manager_dir = _get_manager_dir()
