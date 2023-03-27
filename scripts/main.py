@@ -34,17 +34,22 @@ def deploy(ctx):
     """Deploy selected configuration"""
     pass
 
-@deploy.command()
-@click.argument("version", type=str)
+@deploy.command(name="create")
+@click.argument("version", type=str, required=False)
 @click.pass_context
 def deploy_create(ctx: click.core.Context, version: str):
     """Deploy selected configuration"""
-    try:
-        logging.info(f"Deploy from `{version}` configuration")
-        version_dir = project.get_version_dir()
-        export.export_project(version, script_dir=ctx.obj["scripts_dir"], version_dir=version_dir)
-    except EOFError:
-        logging.info("No `.airflow-manager` config directory found")
+
+    version = version if (version) else project.get_latest_version()
+    if (version):
+        try:
+            logging.info(f"Deploy from `{version}` configuration")
+            version_dir = project.get_version_dir()
+            export.export_project(version, script_dir=ctx.obj["scripts_dir"], version_dir=version_dir)
+        except EOFError:
+            logging.info("No `.airflow-manager` config directory found")
+    else:
+        logging.info("No plan found")
 
 @deploy.command(name="list")
 def deploy_list():
@@ -57,7 +62,7 @@ def deploy_list():
                 tbl.add_row(row)
             print(tbl)
         else:
-            logging.info("There is no logs for deploy")
+            logging.info("No deploy logs found")
     except EOFError:
         logging.info("No `.airflow-manager` config directory found")
 
@@ -102,7 +107,7 @@ def plan_list():
                 tbl.add_row(row)
             print(tbl)
         else:
-            logging.info("There is no logs for plan")
+            logging.info("No logs for plan")
     except EOFError:
         logging.info("No `.airflow-manager` config directory found")
 
