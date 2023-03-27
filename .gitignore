@@ -1,15 +1,18 @@
 # Python
 __pycache__/
 .venv/
+*_env/
 
-# Data
+# Airflow Manager
+.airflow-manager/
 deployment.json
 service-account.json
 *.xlsx
 
 # Package
 *.egg-info
+dist/
 
-# Test/Template
+# Temporary
 dags/
 ddl/

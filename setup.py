@@ -2,14 +2,16 @@ from setuptools import setup, find_packages
 
 setup(
     name = "airflow-manager",
-    version = "1.0",
+    version = "0.1",
     packages = find_packages(),
     include_package_data = True,
     install_requires = [
         "Click",
         "jinja2",
         "openpyxl",
-        "gspread"
+        "gspread",
+        "flatten-dict",
+        "prettytable"
     ],
     entry_points = {
         "console_scripts": [

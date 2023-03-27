@@ -1,7 +1,10 @@
 import os
-from typing import List
+import json
+from typing import List, Union
+from datetime import date, datetime
 
-from scripts.modules import const
+from scripts import const
+
 
 # Public
 def create_dir(dirname: str, prune: int = 0):
@@ -16,7 +19,6 @@ def create_dir(dirname: str, prune: int = 0):
             os.mkdir(dirpath)
     return dirpath
 
-
 def coalesce(*values):
     return next((v for v in values if v is not None), None)
 
@@ -26,6 +28,14 @@ def extend_coalesce(data: list) -> list:
         for col in data
     ]
     return extended
+
+def export_json(data: dict, dirname: str, filename: str):
+    pathname = os.path.join(dirname, filename)
+    with open(pathname, "w") as file:
+        if (data):
+            file.write(json.dumps(data, indent=2, default=_json_serializer))
+        else:
+            file.write("")
 
 def filter_out_keys(data: list, keys: list) -> list:
     fltr_columns = [
@@ -52,3 +62,12 @@ def slicing_list(data: List[list], min_row: int = 1, max_row: int = None, min_co
         for row in (data[min_row-1:max_row] if (max_row) else data[min_row-1:])
     ]
     return sliced
+
+
+# Private
+def _json_serializer(obj: Union[date, datetime]):
+    if isinstance(obj, date):
+        return obj.strftime("%Y-%m-%d")
+    elif isinstance(obj, datetime):
+        return obj.strftime("%Y-%m-%d %H:%M:%S")
+    raise TypeError(f"Type {str(type(obj))} not serializable")

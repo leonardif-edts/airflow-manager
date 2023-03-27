@@ -1,9 +1,21 @@
+BLUEPRINT_CODE = {
+    "Postgres to BQ RV": "postgres_to_bq_rv"
+}
+
 COALESCE_VALUE = {
     "int64": 0,
     "float64": 0.0,
     "string": " ",
     "datetime": "1990-01-01 00:00:00",
     "date": "1990-01-01"
+}
+
+EXCLUDE_TABLE_COLUMNS = {
+    "job_date",
+    "load_datetime",
+    "job_id",
+    "path_filename",
+    "row"
 }
 
 INDEX_COLUMNS = (
@@ -34,10 +46,17 @@ INDEX_COLUMNS_ARRAY = (
     "ops_email_prd"
 )
 
-EXCLUDE_TABLE_COLUMNS = {
-    "job_date",
-    "load_datetime",
-    "job_id",
-    "path_filename",
-    "row"
-}
+PLAN_LOG_COLUMNS = [
+    "id",
+    "create_ts",
+    "source_type",
+    "source_id",
+    "total_dags"
+]
+
+PLAN_DEPLOY_COLUMNS = [
+    "id",
+    "create_ts",
+    "plan_id",
+    "total_dags"
+]
