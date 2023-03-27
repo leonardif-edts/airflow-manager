@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 from datetime import datetime
@@ -41,14 +42,19 @@ def extract_tf(version_dir: str, filename: Optional[str] = None, sheet_id: Optio
         logging.info(f"Extract DAG deployment configuration: Table `{bq_tablename}` DAG `{dag_id}`")
         config = _extract_dag_config(wb, mode, config, row)
 
-    timestamp = datetime.now()
-    filename = f"{timestamp.strftime('%Y%m%d%H%M%S')}.json"
-    utils.export_json(config, version_dir, filename)
-    project.update_plan_logs(config, mode, id, filename)
-    project.update_metadata({
-        "plan.latest_version": filename.replace(".json", ""),
-        "plan.update_ts": timestamp
-    })
+    latest_version = project.get_latest_version()
+    latest_config = json.load(open(os.path.join(version_dir, f"{latest_version}.json"))) if (latest_version) else {}
+    if (config != latest_config):
+        timestamp = datetime.now()
+        filename = f"{timestamp.strftime('%Y%m%d%H%M%S')}.json"
+        utils.export_json(config, version_dir, filename)
+        project.update_plan_logs(config, mode, id, filename)
+        project.update_metadata({
+            "plan.latest_version": filename.replace(".json", ""),
+            "plan.update_ts": timestamp
+        })
+    else:
+        logging.info(f"New configuration have same settings with latest version: `{latest_version}`: Aborted")
 
 
 # Private
