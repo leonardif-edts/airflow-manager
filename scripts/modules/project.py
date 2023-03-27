@@ -1,9 +1,7 @@
 import os
 import json
-import logging
 import flatten_dict
-import itertools
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 from scripts import utils, const
@@ -35,26 +33,20 @@ def init_project():
     utils.export_json(None, manager_dir, "plan_logs.json")
     utils.export_json(None, manager_dir, "deploy_logs.json")
 
-def get_plan_list() -> Optional[list]:
+def get_log_list(filename: str, log_columns: List[str]) -> Optional[list]:
     manager_dir = _get_manager_dir()
-    plan_logs_path = os.path.join(manager_dir, "plan_logs.json")
-    with open(plan_logs_path, "r") as file:
-        plan_logs = [
+    logs_path = os.path.join(manager_dir, filename)
+    with open(logs_path, "r") as file:
+        logs = [
             json.loads(log)
             for log in file.readlines()
         ]
     
-    if (len(plan_logs) == 0):
-        print("test")
-    
-    plan_keys = itertools.chain.from_iterable([plan.keys() for plan in plan_logs])
-    plan_unique_keys = const.PLAN_LOG_COLUMNS + [key for key in sorted(set(plan_keys)) if key not in const.PLAN_LOG_COLUMNS]
-
-    plan_list = [plan_unique_keys] + [
-        [plan.get(key) for key in plan_unique_keys]
-        for plan in plan_logs
+    log_list = [log_columns] + [
+        [log.get(key) for key in log_columns]
+        for log in logs
     ]
-    return plan_list
+    return log_list
 
 def get_version_dir():
     manager_dir = _get_manager_dir()
