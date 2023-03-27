@@ -3,8 +3,6 @@ from typing import List
 
 import jinja2
 
-from scripts import const
-
 
 # Public
 def get_blueprint_code(dag_type: str):
