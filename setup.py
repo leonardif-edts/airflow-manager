@@ -9,7 +9,9 @@ setup(
         "Click",
         "jinja2",
         "openpyxl",
-        "gspread"
+        "gspread",
+        "flatten-dict",
+        "prettytable"
     ],
     entry_points = {
         "console_scripts": [

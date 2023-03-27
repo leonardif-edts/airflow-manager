@@ -1,17 +1,18 @@
 import os
-import logging
-
 import json
+import logging
+from datetime import datetime
 
-from scripts.modules import blueprint
 from scripts import utils
+from scripts.modules import blueprint, project
 
 
 # Public
-def export_project(filename: str, script_dir: str):
-    config = json.load(open(filename))
+def export_project(version: str, script_dir: str, version_dir: str):
+    config = json.load(open(os.path.join(version_dir, f"{version}.json")))
 
     logging.info("Create/Get DAG and DDL directory")
+    timestamp = datetime.now()
     dags_dir = utils.create_dir("dags")
     ddl_dir = utils.create_dir("ddl")
     
@@ -21,6 +22,12 @@ def export_project(filename: str, script_dir: str):
 
         _export_ddl(ddl_dir, dag_config, script_dir)
         _export_dag(dags_dir, dag_config, script_dir)
+    
+    project.update_deploy_logs(config, version)
+    project.update_metadata({
+        "deploy.latest_version": version,
+        "deploy.update_ts": timestamp
+    })
 
 
 # Private
