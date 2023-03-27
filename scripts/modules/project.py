@@ -42,6 +42,11 @@ def get_latest_version() -> str:
     latest_version = _get_metadata(manager_dir, "plan.latest_version")
     return latest_version
 
+def get_latest_deploy() -> str:
+    manager_dir = _get_manager_dir()
+    latest_version = _get_metadata(manager_dir, "deploy.latest_version")
+    return latest_version
+
 def get_log_list(filename: str, log_columns: List[str]) -> Optional[list]:
     manager_dir = _get_manager_dir()
     logs_path = os.path.join(manager_dir, filename)
