@@ -31,7 +31,7 @@
     "gcs": {
       "bucket": "{{ project.dev.gcs_bucket }}",
       "database": "{{ dag.source_database }}",
-      "tablename": "{{ dag.source_tablename }}",
+      "folder": "{{ dag.source_tablename }}",
       "filename": "{{ dag.source_filename }}"
     }
   },
