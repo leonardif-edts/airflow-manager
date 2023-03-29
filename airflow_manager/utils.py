@@ -3,7 +3,7 @@ import json
 from typing import List, Union
 from datetime import date, datetime
 
-from scripts import const
+from airflow_manager import const
 
 
 # Public

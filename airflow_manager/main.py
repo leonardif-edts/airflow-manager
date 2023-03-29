@@ -3,8 +3,8 @@ import logging
 import click
 import prettytable
 
-from scripts import const
-from scripts.modules import (
+from airflow_manager import const
+from airflow_manager.modules import (
     export,
     extract,
     project

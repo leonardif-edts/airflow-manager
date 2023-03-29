@@ -1,9 +1,11 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name = "airflow-manager",
     version = "0.1",
-    packages = find_packages(),
+    packages = ["airflow_manager"],
+    package_dir = {"airflow_manager": "airflow_manager"},
+    package_data = {"airflow_manager": ["airflow_manager/blueprint/*"]},
     include_package_data = True,
     install_requires = [
         "Click",
@@ -15,7 +17,7 @@ setup(
     ],
     entry_points = {
         "console_scripts": [
-             "airflow-manager = scripts.main:cli"   
+             "airflow-manager = airflow_manager.main:cli"   
         ]
     }
 )

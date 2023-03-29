@@ -4,7 +4,7 @@ import flatten_dict
 from typing import Optional, List
 from datetime import datetime
 
-from scripts import utils
+from airflow_manager import utils
 
 
 # Public

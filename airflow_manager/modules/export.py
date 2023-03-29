@@ -3,35 +3,35 @@ import json
 import logging
 from datetime import datetime
 
-from scripts import utils
-from scripts.modules import blueprint, project
+from airflow_manager import utils
+from airflow_manager.modules import blueprint, project
 
 
 # Public
 def export_project(version: str, script_dir: str, version_dir: str):
     latest_version = project.get_latest_deploy()
-    if (latest_version) and (latest_version == version):
-        logging.info(f"Current deployment already using `{version}` as deployment configuration: Aborted")
-    else:
-        config = json.load(open(os.path.join(version_dir, f"{version}.json")))
+    # if (latest_version) and (latest_version == version):
+    #     logging.info(f"Current deployment already using `{version}` as deployment configuration: Aborted")
+    # else:
+    config = json.load(open(os.path.join(version_dir, f"{version}.json")))
 
-        logging.info("Create/Get DAG and DDL directory")
-        timestamp = datetime.now()
-        dags_dir = utils.create_dir("dags")
-        ddl_dir = utils.create_dir("ddl")
-        
-        for dag in config["dags"]:
-            logging.info(f"Exporting DAG: {dag['dag_id']}")
-            dag_config = {"dag": dag, "project": config["project"]}
+    logging.info("Create/Get DAG and DDL directory")
+    timestamp = datetime.now()
+    dags_dir = utils.create_dir("dags")
+    ddl_dir = utils.create_dir("ddl")
+    
+    for dag in config["dags"]:
+        logging.info(f"Exporting DAG: {dag['dag_id']}")
+        dag_config = {"dag": dag, "project": config["project"]}
 
-            _export_ddl(ddl_dir, dag_config, script_dir)
-            _export_dag(dags_dir, dag_config, script_dir)
-        
-        project.update_deploy_logs(config, version)
-        project.update_metadata({
-            "deploy.latest_version": version,
-            "deploy.update_ts": timestamp
-        })
+        _export_ddl(ddl_dir, dag_config, script_dir)
+        _export_dag(dags_dir, dag_config, script_dir)
+    
+    project.update_deploy_logs(config, version)
+    project.update_metadata({
+        "deploy.latest_version": version,
+        "deploy.update_ts": timestamp
+    })
 
 
 # Private

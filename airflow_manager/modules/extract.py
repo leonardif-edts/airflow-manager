@@ -7,8 +7,8 @@ from typing import Union, Optional
 import openpyxl
 import gspread
 
-from scripts import const, utils
-from scripts.modules import project
+from airflow_manager import const, utils
+from airflow_manager.modules import project
 
 
 # Public
