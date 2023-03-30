@@ -12,6 +12,7 @@ service-account.json
 # Package
 *.egg-info
 dist/
+build/
 
 # Temporary
 dags/
