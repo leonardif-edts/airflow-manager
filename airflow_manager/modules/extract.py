@@ -111,7 +111,7 @@ def _extract_dag_table(wb: Union[openpyxl.Workbook, gspread.spreadsheet.Spreadsh
     }
 
     dag_config["unique"] = utils.extend_coalesce(utils.get_filtered_columns(dw_cols, "unique", [True, "TRUE"]))
-    dag_config["partition"] = utils.get_filtered_columns(dw_cols, "partition", [True, "TRUE"])[0]
+    dag_config["partition"] = utils.get_filtered_columns(dw_cols, "partition", [True, "TRUE"], index=0)
     dag_config["cluster"] = utils.get_filtered_columns(dw_cols, "cluster", [True, "TRUE"])
     table_columns["dw"] = utils.filter_out_keys(table_columns.get("dw", {}), ["unique", "partition", "cluster"])
     dag_config["columns"] = table_columns

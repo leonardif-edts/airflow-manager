@@ -1,6 +1,6 @@
 import os
 import json
-from typing import List, Union
+from typing import List, Union, Optional
 from datetime import date, datetime
 
 from airflow_manager import const
@@ -48,13 +48,18 @@ def filter_out_keys(data: list, keys: list) -> list:
     ]
     return fltr_columns
 
-def get_filtered_columns(data: list, key: str, value: list) -> list:
+def get_filtered_columns(data: list, key: str, value: list, index: Optional[int] = None) -> list:
     fltr_columns = [
         {"name": column["name"], "datatype": column["datatype"]}
         for column in data
         if column[key] in value
     ]
-    return fltr_columns
+
+    if (index):
+        if (index <= len(fltr_columns)):
+            return fltr_columns[index]
+    else:
+        return fltr_columns
 
 def slicing_list(data: List[list], min_row: int = 1, max_row: int = None, min_col: int = 1, max_col: int = None) -> list:
     sliced = [
