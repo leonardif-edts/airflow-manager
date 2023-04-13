@@ -11,8 +11,8 @@
       "tmp_dataset_tablename": "{{ project.dev.tmp_dataset }}.{{ dag.bq_tablename }}",
       "src_dataset_tablename": "{{ project.dev.src_dataset }}.{{ dag.bq_tablename }}",
       "stg_dataset_tablename": "{{ project.dev.stg_dataset }}.{{ dag.bq_tablename }}",
-      "dw_dataset_tablename" : "{{ project.dev.dw_dataset }}.{{ dag.bq_tablename }}_rej",
-      "rej_dataset_tablename": "{{ project.dev.rej_dataset }}.{{ dag.bq_tablename }}",
+      "dw_dataset_tablename" : "{{ project.dev.dw_dataset }}.{{ dag.bq_tablename }}",
+      "rej_dataset_tablename": "{{ project.dev.rej_dataset }}.{{ dag.bq_tablename }}_rej",
       "ops_dataset_tablename": "{{ project.dev.ops_table }}",
       "partition_column": "{{ dag.partition.name }}",
       "unique_columns": {% if not dag.unique -%}[]{% else %}[
