@@ -5,7 +5,7 @@ WHERE job_id = {{ job_id_bq(data_interval_end) }}
 
 INSERT INTO `{{ params.project_id }}.{{ params.target_dataset_tablename }}` (
   {%- endraw %}
-  {%- for col in dag.columns.src %}
+  {%- for col in dag.columns.stg %}
   {{ col.name }},
   {%- endfor %}
   job_date,

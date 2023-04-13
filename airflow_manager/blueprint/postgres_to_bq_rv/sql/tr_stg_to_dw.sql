@@ -153,8 +153,8 @@ USING (
   WHERE rownum = 1
 ) S
 {%- endraw %}
-  ON COALESCE(tmp_tbl.{{ dag.unique[0].name }}, {{ dag.unique[0].coalesce }}) = COALESCE(stg_tbl.{{ dag.unique[0].name }}, dag.unique[0].coalesce){%- for col in dag.unique[1:] %}
-  AND COALESCE(tmp_tbl.{{ col.name }}, col.coalesce) = COALESCE(stg_tbl.{{ col.name }}, col.coalesce)
+  ON COALESCE(T.{{ dag.unique[0].name }}, "{{ dag.unique[0].coalesce }}") = COALESCE(S.{{ dag.unique[0].name }}, dag.unique[0].coalesce){%- for col in dag.unique[1:] %}
+  AND COALESCE(T.{{ col.name }}, "{{ col.coalesce }}") = COALESCE(S.{{ col.name }}, "{{ col.coalesce }}")
 {%- endfor %}
 WHEN MATCHED THEN
   UPDATE SET
