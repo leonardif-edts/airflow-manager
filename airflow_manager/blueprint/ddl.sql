@@ -42,7 +42,7 @@ CREATE OR REPLACE TABLE `dw.{{ dag.bq_tablename }}` (
 )
 {%- if dag.partition or dag.cluster %}
 {%- if dag.partition %}
-PARTITION BY {{ col.name }}
+PARTITION BY {{ dag.partition.name }}
 {%- endif -%}
 {%- if dag.cluster %}
 CLUSTER BY {% for col in dag.cluster -%} {{ col.name }}{{ ", " if not loop.last else ""}}{%- endfor -%}
