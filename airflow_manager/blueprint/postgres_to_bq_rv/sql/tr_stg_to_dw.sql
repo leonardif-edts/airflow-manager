@@ -80,7 +80,7 @@ FROM (
   WHERE rownum = 1
 );
 {%- endraw -%}
-{%- elif (dag.type | lower == "transaction") and (dag.method | lower == "truncate/insert") -%}
+{%- elif (dag.method | lower == "truncate/insert") -%}
 -- Truncate/Insert
 {%- raw %}
 TRUNCATE TABLE `{{ params.project_id }}.{{ params.target_dataset_tablename }}`;
@@ -88,7 +88,7 @@ TRUNCATE TABLE `{{ params.project_id }}.{{ params.target_dataset_tablename }}`;
 INSERT INTO `{{ params.project_id }}.{{ params.target_dataset_tablename }}` (
   {%- endraw %}
   {%- for col in dag.columns.dw %}
-  tmp_tbl.{{ col.name }},
+  {{ col.name }},
   {%- endfor %}
   job_date,
   load_datetime,
