@@ -12,7 +12,7 @@ INSERT INTO `{{ params.project_id }}.{{ params.target_dataset_tablename }}` (
 )
 SELECT
   {%- for col in dag.columns.dw %}
-  tmp_tbl.{{ col.name }},
+  {{ col.name }},
   {%- endfor %}
   {% raw -%}
   PARSE_DATE("%Y%m%d", SUBSTR(CAST({{ job_id_bq(next_execution_date) }} AS STRING), 1, 8)) AS job_date,
@@ -42,8 +42,8 @@ WHERE NOT EXISTS (
     WHERE rownum = 1
   ) stg_tbl
   {%- endraw %}
-  WHERE COALESCE(tmp_tbl.{{ dag.unique[0].name }}, "{{ dag.unique[0].coalesce }}") = COALESCE(stg_tbl.{{ dag.unique[0].name }}, "{{ dag.unique[0].coalesce }}"){%- for col in dag.unique[1:] %}
-    AND COALESCE(tmp_tbl.{{ col.name }}, "{{ col.coalesce }}") = COALESCE(stg_tbl.{{ col.name }}, "{{ col.coalesce }}")
+  WHERE COALESCE(tmp_tbl.{{ dag.unique[0].name }}, {% if dag.unique[0].coalesce is integer -%}{{ dag.unique[0].coalesce}}{%- else %}"{{ dag.unique[0].coalesce }}"{% endif %}) = COALESCE(stg_tbl.{{ dag.unique[0].name }}, {% if dag.unique[0].coalesce is integer -%}{{ dag.unique[0].coalesce }}{%- else %}"{{ dag.unique[0].coalesce }}"{%- endif %}){%- for col in dag.unique[1:] %}
+    AND COALESCE(tmp_tbl.{{ col.name }}, {% if col.coalesce is integer -%}{{ col.coalesce }}{%- else %}"{{ col.coalesce }}"{% endif %}) = COALESCE(stg_tbl.{{ col.name }}, {% if int(col.coalesce) %}{{ col.coalesce }}{% else %}"{{ col.coalesce }}"{%- endif %})
     {%- endfor %}
     AND (
       COALESCE(tmp_tbl.created_date, "2022-01-01") = COALESCE(stg_tbl.created_date, "2022-01-01")
@@ -153,8 +153,8 @@ USING (
   WHERE rownum = 1
 ) S
 {%- endraw %}
-  ON COALESCE(T.{{ dag.unique[0].name }}, "{{ dag.unique[0].coalesce }}") = COALESCE(S.{{ dag.unique[0].name }}, "{{ dag.unique[0].coalesce }}"){%- for col in dag.unique[1:] %}
-  AND COALESCE(T.{{ col.name }}, "{{ col.coalesce }}") = COALESCE(S.{{ col.name }}, "{{ col.coalesce }}")
+  ON COALESCE(T.{{ dag.unique[0].name }}, {% if dag.unique[0].coalesce is integer%}{{ dag.unique[0].coalesce }}{% else %}"{{ dag.unique[0].coalesce }}"{% endif %}) = COALESCE(S.{{ dag.unique[0].name }}, {% if dag.unique[0].coalesce is integer %}{{ dag.unique[0].coalesce }}{% else %}"{{ dag.unique[0].coalesce }}"{% endif %}){%- for col in dag.unique[1:] %}
+  AND COALESCE(T.{{ col.name }}, {%- if col.coalesce is integer %}{{ col.coalesce }}{%- else %}"{{ col.coalesce }}"{%- endif %}) = COALESCE(S.{{ col.name }}, {% if col.coalesce is integer %}{{ col.coalesce }}{% else -%}"{{ col.coalesce }}"{% endif %})
 {%- endfor %}
 WHEN MATCHED THEN
   UPDATE SET
