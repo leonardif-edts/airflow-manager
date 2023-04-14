@@ -1,4 +1,4 @@
-{%- if (dag.type | lower == "transaction") and (dag.method | lower == "delete/insert") -%}
+{%- if (dag.method | lower == "delete/insert") -%}
 -- Delete/Insert
 {%- raw %}
 INSERT INTO `{{ params.project_id }}.{{ params.target_dataset_tablename }}` (
@@ -181,4 +181,8 @@ WHEN NOT MATCHED THEN
     CURRENT_DATETIME("Asia/Jakarta"),
     job_id
   );
+
+{%- elif (dag.type | lower == "master") and (dag.method | lower == "delete/insert") -%}
+
+
 {%- endif -%}
