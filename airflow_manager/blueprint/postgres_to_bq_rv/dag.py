@@ -247,8 +247,10 @@ with DAG(
             params        = {
                 "project_id"              : JOB["project_id"],
                 "target_dataset_tablename": BQ["dw_dataset_tablename"],
-                "stg_dataset_tablename"   : BQ["stg_dataset_tablename"],
+                "source_dataset_tablename": BQ["stg_dataset_tablename"],
+                {%- endraw %}{%- if (dag.type | lower == "transaction") and (dag.method | lower == "delete/insert") %}
                 "tmp_dataset_tablename"   : BQ["tmp_dataset_tablename"]
+                {%- endif %}{%- raw %}
             }
         )
 

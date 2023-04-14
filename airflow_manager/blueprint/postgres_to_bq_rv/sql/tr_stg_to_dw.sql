@@ -35,7 +35,7 @@ WHERE NOT EXISTS (
           ORDER BY path_filename DESC
         ) AS rownum
       {%- raw %}
-      FROM `{{ params.project_id }}.{{ params.stg_dataset_tablename}}`
+      FROM `{{ params.project_id }}.{{ params.source_dataset_tablename }}`
       WHERE job_id = {{ job_id_bq(next_execution_date) }}
         AND job_date = PARSE_DATE("%Y%m%d", SUBSTR(CAST({{ job_id_bq(next_execution_date) }} AS STRING), 1, 8))
     ) r
@@ -73,7 +73,7 @@ FROM (
         ORDER BY path_filename DESC
       ) AS rownum
       {%- raw %}
-    FROM `{{ params.project_id }}.{{ params.stg_dataset_tablename}}`
+    FROM `{{ params.project_id }}.{{ params.source_dataset_tablename }}`
     WHERE job_id = {{ job_id_bq(next_execution_date) }}
       AND job_date = PARSE_DATE("%Y%m%d", SUBSTR(CAST({{ job_id_bq(next_execution_date) }} AS STRING), 1, 8))
   ) r
@@ -112,7 +112,7 @@ FROM (
       ORDER BY path_filename DESC
     ) AS rownum
   {%- raw %}
-  FROM `{{ params.project_id }}.{{ params.stg_dataset_tablename }}`
+  FROM `{{ params.project_id }}.{{ params.source_dataset_tablename }}`
   WHERE job_id = {{ job_id_bq(data_interval_end) }}
     AND job_date = PARSE_DATE("%Y%m%d", SUBSTR(CAST({{ job_id_bq(data_interval_end) }} AS STRING), 1, 8))
 )
