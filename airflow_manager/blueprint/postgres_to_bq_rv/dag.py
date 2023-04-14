@@ -22,7 +22,7 @@ from airflow.providers.google.cloud.operators.bigquery import (
 from composer_idm_klik_apollo_prd.dags.shared import (
     log_insert, 
     macro, 
-    callback{%- if (dag.type | lower == "transaction") and (dag.method | lower == "delete/insert") %},
+    callback{%- if (dag.method | lower == "delete/insert") %},
     custom_delete_insert{%- endif %}
 )
 
@@ -221,7 +221,7 @@ with DAG(
     
 
     {%- endraw %}
-    {% if (dag.type | lower == "transaction") and (dag.method | lower == "delete/insert") %}
+    {% if (dag.method | lower == "delete/insert") %}
     
     delete_exist_dw = custom_delete_insert.KlikIDMApolloDeleteInsertUsingTMPTable(
         task_id                 = "delete_exist_dw",
@@ -272,7 +272,7 @@ with DAG(
 
 
     {%- endraw %}
-    {% if (dag.type | lower == "transaction") and (dag.method | lower == "delete/insert") %}
+    {% if (dag.method | lower == "delete/insert") %}
     
     delete_tmp = BigQueryDeleteTableOperator(
         task_id                 = "delete_tmp",
@@ -312,11 +312,11 @@ with DAG(
         >> source_to_ext
         >> ext_to_src
         >> src_to_stg
-        {%- endraw %}{% if (dag.type | lower == "transaction") and (dag.method | lower == "delete/insert") %}
+        {%- endraw %}{% if (dag.method | lower == "delete/insert") %}
         >> delete_exist_dw
         {%- endif %}{%- raw %}
         >> stg_to_dw
-        {%- endraw %}{% if (dag.type | lower == "transaction") and (dag.method | lower == "delete/insert") %}
+        {%- endraw %}{% if (dag.method | lower == "delete/insert") %}
         >> delete_tmp
         {%- endif %}{%- raw %}
         >> seq_log_etl
