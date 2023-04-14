@@ -96,7 +96,7 @@ INSERT INTO `{{ params.project_id }}.{{ params.target_dataset_tablename }}` (
 )
 SELECT 
   {%- for col in dag.columns.dw %}
-  tmp_tbl.{{ col.name }},
+  {{ col.name }},
   {%- endfor %}
   job_date,
   CURRENT_DATETIME("Asia/Jakarta") AS load_datetime,
