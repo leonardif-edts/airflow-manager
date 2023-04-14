@@ -55,7 +55,7 @@ UNION ALL
 
 SELECT
   {%- for col in dag.columns.dw %}
-  tmp_tbl.{{ col.name }},
+  {{ col.name }},
   {%- endfor %}
   job_date,
   CURRENT_DATETIME("Asia/Jakarta"),
@@ -181,8 +181,4 @@ WHEN NOT MATCHED THEN
     CURRENT_DATETIME("Asia/Jakarta"),
     job_id
   );
-
-{%- elif (dag.type | lower == "master") and (dag.method | lower == "delete/insert") -%}
-
-
 {%- endif -%}
