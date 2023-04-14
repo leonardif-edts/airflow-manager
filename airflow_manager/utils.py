@@ -55,8 +55,8 @@ def get_filtered_columns(data: list, key: str, value: list, index: Optional[int]
         if column[key] in value
     ]
 
-    if (index):
-        if (index <= len(fltr_columns)):
+    if (index is not None):
+        if (index < len(fltr_columns)):
             return fltr_columns[index]
     else:
         return fltr_columns
