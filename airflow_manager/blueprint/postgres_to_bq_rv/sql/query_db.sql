@@ -1,6 +1,6 @@
 SELECT
   {%- for col in dag.columns.ext %}
-  {% if col.datatype == "text" or col.datatype == "varchar" %}REGEXP_REPLACE({{ col.name }}, E'[\\n\\r]+', ' ', 'g' ) AS {{ col.name }}{% else %}{{ col.name }}{% endif %}{{ "," if not loop.last else ""}}
+  {% if col.datatype == "text" or col.datatype == "varchar" %}REGEXP_REPLACE({{ col.name }}, E'[\\n\\r\\|"~]+', ' ', 'g' ) AS {{ col.name }}{% else %}{{ col.name }}{% endif %}{{ "," if not loop.last else ""}}
   {%- endfor %}
 {%- raw %}
 FROM {{ params.dataset_table_name }}
