@@ -9,7 +9,6 @@ from airflow_manager.modules import blueprint, project
 
 # Public
 def export_project(version: str, script_dir: str, version_dir: str):
-    latest_version = project.get_latest_deploy()
     config = json.load(open(os.path.join(version_dir, f"{version}.json")))
 
     logging.info("Create/Get DAG and DDL directory")
@@ -47,13 +46,14 @@ def _export_ddl(ddl_dir: str, dag_config: dict, script_dir: str):
     _export_script(ddl_script, ddl_directory, ddl_filename)
 
 def _export_dag(dags_dir: str, dag_config: dict, script_dir: str):
-    dag_directory = os.path.join(dags_dir, dag_config["dag"].get("dag_id", "").lower())
+    dag_filename = dag_config["dag"]["dag_id"].replace("_dw", "")
+    dag_directory = os.path.join(dags_dir, dag_filename)
     
     blueprint_code = blueprint.get_blueprint_code(dag_config["dag"]["dag_type"])
     blueprint_filelist = blueprint.get_blueprint_filelist(script_dir, blueprint_code)
     for blueprint_file in blueprint_filelist:
         dag_script = blueprint.render_script(script_dir, blueprint_code, blueprint_file, dag_config)
-        dag_script_filename = blueprint_file if (blueprint_file != "dag.py") else f"{dag_config['dag']['dag_id']}.py"
+        dag_script_filename = blueprint_file if (blueprint_file != "dag.py") else f"{dag_filename}.py"
 
         logging.info(f"Export DAG script `{blueprint_file}` to `{os.path.join(dag_directory, dag_script_filename)}`")
         _export_script(dag_script, dag_directory, dag_script_filename)
