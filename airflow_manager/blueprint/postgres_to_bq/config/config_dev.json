@@ -1,0 +1,61 @@
+{
+  "env": {
+    "source": {
+      "postgres_conn_id": "{{ dag.source_connection }}",
+      "dataset_table_name": "{{ dag.source_tablename }}",
+      "type": "{{ dag.type | lower }}",
+      "delimiter_count": {{ dag.columns.ext | length - 1 }},
+      "header_key": "{{ dag.columns.ext[0].name }}{{ dag.source_delimiter }}{{ dag.columns.ext[1].name }}"
+    },
+    "bq": {
+      "tmp_dataset_tablename": "{{ project.dev.tmp_dataset }}.{{ dag.bq_tablename }}",
+      "src_dataset_tablename": "{{ project.dev.src_dataset }}.{{ dag.bq_tablename }}",
+      "stg_dataset_tablename": "{{ project.dev.stg_dataset }}.{{ dag.bq_tablename }}",
+      "dw_dataset_tablename" : "{{ project.dev.dw_dataset }}.{{ dag.bq_tablename }}",
+      "rej_dataset_tablename": "{{ project.dev.rej_dataset }}.{{ dag.bq_tablename }}_rej",
+      "ops_dataset_tablename": "{{ project.dev.ops_table }}",
+      "partition_column": "{{ dag.partition.name }}",
+      "unique_columns": {% if not dag.unique -%}[]{% else %}[
+        {%- for col in dag.unique %}
+        "{{ col.name }}"{{ "," if not loop.last else "" }}
+        {%- endfor %}
+      ]
+      {%- endif %},
+      "cluster_columns": {% if not dag.cluster -%}[]{% else %}[
+        {%- for col in dag.cluster %}
+        "{{ col.name }}"{{ "," if not loop.last else "" }}
+        {%- endfor %}
+      ]
+      {%- endif %}
+    },
+    "gcs": {
+      "bucket": "{{ project.dev.gcs_bucket }}",
+      "database": "{{ dag.source_database }}",
+      "folder": "{{ dag.source_tablename }}",
+      "filename": "{{ dag.source_filename }}"
+    }
+  },
+  "job": {
+    "project_id": "{{ project.dev.project_id }}",
+    "job_name": "{{ dag.dag_id }}",
+    "owner": "{{ project.dev.owner }}",
+    "project_name": "{{ project.dev.project_name }}",
+    "email": {% if not dag.ops_email_dev -%}[]{% else %}[
+      {%- for email in dag.ops_email_dev %}
+      "{{ email }}"{{ "," if not loop.last else "" }}
+      {%- endfor %}
+    ]
+    {%- endif %},
+    "tags": [
+      "{{ project.dev.owner }}",
+      "{{ dag.type | lower }}",
+      "child"
+    ],
+    "schedule": {% if dag.dag_schedule %}"{{ dag.dag_schedule }}"{% else %}null{% endif %},
+    "start_date": "2022-12-09",
+    "retries": {{ dag.dag_retries_count }},
+    "retry_delay": {{ dag.dag_retries_delay }},
+    "concurrency": {{ dag.dag_concurrency }},
+    "max_active_runs": {{ dag.dag_max_active_runs }}
+  }
+}
