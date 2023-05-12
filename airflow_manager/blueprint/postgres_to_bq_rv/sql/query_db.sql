@@ -14,10 +14,10 @@ FROM {{ params.dataset_table_name }}
   {%- elif ("start_date" in dag_run.conf ) and ("end_date" in dag_run.conf ) -%}
     WHERE rowversion BETWEEN (TO_TIMESTAMP('{{ dag_run.conf["start_date"] }}', '%Y-%MM-%DD %HH24')) AND (TO_TIMESTAMP('{{ dag_run.conf["end_date"] }}', '%Y-%MM-%DD %HH24') + INTERVAL '1 DAY')
   {%- else -%}
-    WHERE rowversion BETWEEN (CURRENT_DATE - INTERVAL '1 DAY') and CURRENT_DATE
+    WHERE rowversion BETWEEN (CURRENT_DATE - INTERVAL '1 DAY') and CURRENT_DATE + INTERVAL '1 DAY'
   {%- endif %}
 {%- else -%}
-WHERE rowversion BETWEEN (CURRENT_DATE - INTERVAL '1 DAY') and CURRENT_DATE
+WHERE rowversion BETWEEN (CURRENT_DATE - INTERVAL '1 DAY') and CURRENT_DATE + INTERVAL '1 DAY'
 {%- endif %}
 {%- if "limit" in dag_run.conf %}
 LIMIT {{ dag_run.conf["limit"] }}
